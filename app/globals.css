@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold: #f1d582;
+  --color-gold-muted: rgba(241, 213, 130, 0.6);
+  --color-rich-black: #0a0a0b;
+  --color-rich-black-light: #141415;
+  --color-glass: rgba(255, 255, 255, 0.03);
+  --color-glass-border: rgba(241, 213, 130, 0.15);
+  
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-ibm-plex-sans-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-heading-en: var(--font-urbanist), ui-sans-serif, system-ui, sans-serif;
+  --font-heading-ar: var(--font-alexandria), ui-sans-serif, system-ui, sans-serif;
+  --font-body-active: var(--font-sans);
+  --font-heading-active: var(--font-heading-en);
+}
+
+@layer base {
+  body {
+    @apply bg-rich-black text-white antialiased selection:bg-gold selection:text-rich-black;
+    font-family: var(--font-body-active);
+    transition:
+      background-color 400ms ease,
+      color 400ms ease,
+      font-family 300ms ease;
+  }
+
+  body.font-sans {
+    --font-body-active: var(--font-sans);
+    --font-heading-active: var(--font-heading-en);
+  }
+
+  body.font-arabic {
+    --font-body-active: var(--font-arabic);
+    --font-heading-active: var(--font-heading-ar);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading-active);
+  }
+
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+
+  button,
+  a {
+    transition:
+      color 250ms ease,
+      background-color 250ms ease,
+      border-color 250ms ease,
+      opacity 250ms ease,
+      transform 250ms ease;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-glass backdrop-blur-[24px] border border-glass-border shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
+  }
+  
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-gold to-white/70;
+  }
+}
