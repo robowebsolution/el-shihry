@@ -101,7 +101,7 @@ const renderChars = (node: ReactNode, keyPrefix: string, wordClassName?: string,
 
     return React.cloneElement(
       node as React.ReactElement<Record<string, unknown>>,
-      { ...props, className: isGradient ? undefined : nodeClassName },
+      { ...props, className: isGradient ? undefined : nodeClassName, key: keyPrefix },
       children
     );
   }

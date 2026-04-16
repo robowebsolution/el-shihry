@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { Facebook, Globe, Instagram, Linkedin, Mail, MapPin, Phone } from 'lucide-react';
 
@@ -51,10 +52,15 @@ export function Footer() {
         <div className="grid gap-12 border-b border-white/10 pb-12 lg:grid-cols-[1.15fr_0.75fr_0.75fr_1fr]">
           <div className={cn('max-w-md', isArabic ? 'text-right' : 'text-left')}>
             <LocaleReveal localeKey={`footer-brand-${locale}`}>
-              <div className={cn('mb-4 inline-flex items-center gap-3 rounded-full border border-gold/20 bg-white/[0.03] px-4 py-2 text-xs tracking-[0.3em] text-gold/80 uppercase', isArabic ? 'flex-row-reverse' : '')}>
-                <span className="h-2 w-2 rounded-full bg-gold" />
-                <span>{copy.nav.brand}</span>
-              </div>
+              <Link href="/" aria-label="El Shihry Home" className="mb-6 inline-block">
+                <Image
+                  src="/logo.webp"
+                  alt="El Shihry Logo"
+                  width={180}
+                  height={72}
+                  className="h-16 w-auto object-contain md:h-20"
+                />
+              </Link>
 
               <ScrollRevealHeading
                 as="h2"

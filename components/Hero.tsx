@@ -4,7 +4,8 @@ import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Image from 'next/image';
+import { ArrowLeft, ArrowRight, ArrowUpLeft, ArrowUpRight } from 'lucide-react';
+import Link from 'next/link';
 
 import { useLanguage } from '@/components/LanguageProvider';
 import { LocaleReveal } from '@/components/LocaleReveal';
@@ -16,12 +17,13 @@ gsap.registerPlugin(ScrollTrigger);
 
 export function Hero() {
   const container = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLDivElement>(null);
   const { copy, locale } = useLanguage();
+  const isRTL = locale === 'ar';
 
-  useGSAP(
+    useGSAP(
     () => {
-      gsap.to(imageRef.current, {
+      gsap.to(videoRef.current, {
         yPercent: 30,
         ease: 'none',
         scrollTrigger: {
@@ -32,53 +34,147 @@ export function Hero() {
         },
       });
     },
-    { scope: container }
+    { dependencies: [locale], scope: container }
   );
 
   return (
-    <section ref={container} className="relative flex h-screen w-full items-center justify-center overflow-hidden">
-      <div ref={imageRef} className="absolute inset-0 -top-[15%] z-0 h-[130%] w-full">
-        <div className="absolute inset-0 z-10 bg-rich-black/60" />
-        <Image src={siteImages.hero} alt="Luxury Real Estate" fill className="object-cover" priority />
-      </div>
-
-      <div className="relative z-10 px-4 text-center" style={{ perspective: '1000px' }}>
-        <ScrollRevealHeading
-          as="h1"
-          localeKey={`hero-heading-${locale}`}
-          start="top 92%"
+    <section
+      ref={container}
+      dir={isRTL ? 'rtl' : 'ltr'}
+      className="relative flex h-screen w-full items-center overflow-hidden"
+    >
+      {/* ─── Video Background ─── */}
+      <div ref={videoRef} className="absolute inset-0 -top-[15%] z-0 h-[130%] w-full">
+        {/* gradient overlay: darker on the content side */}
+        <div 
           className={cn(
-            'mb-4 text-5xl font-bold tracking-tighter md:text-8xl',
-            locale === 'en' ? 'uppercase' : 'leading-[1.15]'
-          )}
-          lines={[
-            copy.hero.titleFirst,
-            <span key="hero-gold" className="text-gradient-gold block">
-              {copy.hero.titleSecond}
-            </span>,
-          ]}
+            "absolute inset-0 z-10 bg-gradient-to-r from-rich-black/85 via-rich-black/50 to-rich-black/20",
+            isRTL && "bg-gradient-to-l"
+          )} 
         />
-
-        <LocaleReveal localeKey={`hero-copy-${locale}`} className="mt-8 text-center">
-          <p
-            className={cn(
-              'mx-auto max-w-3xl text-lg font-light text-white/80 md:text-2xl',
-              locale === 'en' ? 'tracking-wide' : 'leading-9'
-            )}
-          >
-            {copy.hero.subtitle}
-          </p>
-        </LocaleReveal>
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster={siteImages.hero.src}
+          className="h-full w-full object-cover"
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
+        </video>
       </div>
 
-      <div className="absolute bottom-10 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2">
-        <LocaleReveal localeKey={`hero-scroll-${locale}`}>
-          <span className="text-xs tracking-[0.3em] text-white/50 uppercase">{copy.hero.scrollLabel}</span>
-        </LocaleReveal>
-        <div className="h-12 w-px overflow-hidden bg-white/20">
-          <div className="h-full w-full origin-top animate-pulse bg-gold" />
+      {/* ─── Content ─── */}
+      <div className="relative z-10 w-full max-w-screen-xl mx-auto px-6 md:px-16">
+        <div className={cn("max-w-3xl", isRTL && " text-right")}>
+
+          {/* Badge */}
+          <LocaleReveal localeKey={`hero-badge-${locale}`} className="mb-6">
+            <span
+              className={cn(
+                'inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-[0.25em] text-white/60 uppercase backdrop-blur-sm'
+              )}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
+              {copy.hero.badge}
+            </span>
+          </LocaleReveal>
+
+          {/* Heading */}
+          <ScrollRevealHeading
+            as="h1"
+            localeKey={`hero-heading-${locale}`}
+            start="top 92%"
+            className={cn(
+              'mb-6 font-bold tracking-tighter text-white',
+              'text-4xl leading-[1.05] md:text-5xl lg:text-6xl',
+              locale === 'en' ? 'uppercase' : 'leading-[1.15]'
+            )}
+            lines={[
+              copy.hero.titleFirst,
+              <span key="hero-gold" className="text-gradient-gold block">
+                {copy.hero.titleSecond}
+              </span>,
+            ]}
+          />
+
+          {/* Subtitle */}
+          <LocaleReveal localeKey={`hero-copy-${locale}`} className="mb-10">
+            <p
+              className={cn(
+                'max-w-xl text-sm font-light text-white/60 md:text-base',
+                locale === 'ar' ? 'leading-8' : 'tracking-wide leading-relaxed'
+              )}
+            >
+              {copy.hero.subtitle}
+            </p>
+          </LocaleReveal>
+
+          {/* Buttons */}
+          <LocaleReveal localeKey={`hero-btns-${locale}`}>
+            <div className={cn('flex flex-wrap gap-4')}>
+
+              {/* Primary — Download Portfolio */}
+              <a
+                href="/portfolio.pdf"
+                download
+                className={cn(
+                  'group inline-flex items-center gap-3 rounded-full px-7 py-3.5',
+                  'bg-white text-rich-black text-sm font-semibold tracking-wide',
+                  'transition-all duration-300 hover:bg-gold hover:text-rich-black',
+                  'shadow-[0_0_30px_rgba(255,255,255,0.08)]'
+                )}
+              >
+                {!isRTL && <span>{copy.hero.btnDownload}</span>}
+                <span
+                  className={cn(
+                    'flex h-7 w-7 items-center justify-center rounded-full bg-rich-black/10',
+                    'transition-transform duration-300',
+                    isRTL ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'
+                  )}
+                >
+                  {isRTL ? (
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                  ) : (
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  )}
+                </span>
+                {isRTL && <span>{copy.hero.btnDownload}</span>}
+              </a>
+
+              {/* Secondary — See Our Projects */}
+              <Link
+                href={{ pathname: '/projects' }}
+                className={cn(
+                  'group inline-flex items-center gap-2 rounded-full border border-white/25 px-7 py-3.5',
+                  'text-sm font-medium text-white/80 tracking-wide',
+                  'transition-all duration-300 hover:border-gold/60 hover:text-white backdrop-blur-sm'
+                )}
+              >
+                {!isRTL && <span>{copy.hero.btnProjects}</span>}
+                {isRTL ? (
+                  <ArrowUpLeft
+                    className={cn(
+                      'h-4 w-4 transition-transform duration-300',
+                      'group-hover:-translate-y-0.5 group-hover:-translate-x-0.5 group-hover:text-gold'
+                    )}
+                  />
+                ) : (
+                  <ArrowUpRight
+                    className={cn(
+                      'h-4 w-4 transition-transform duration-300',
+                      'group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-gold'
+                    )}
+                  />
+                )}
+                {isRTL && <span>{copy.hero.btnProjects}</span>}
+              </Link>
+
+            </div>
+          </LocaleReveal>
         </div>
       </div>
+
     </section>
   );
 }

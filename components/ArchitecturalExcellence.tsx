@@ -69,7 +69,7 @@ export function ArchitecturalExcellence() {
         }
       );
     },
-    { scope: container }
+    { dependencies: [locale], scope: container }
   );
 
   return (
@@ -101,7 +101,7 @@ export function ArchitecturalExcellence() {
                 lines={[
                   <span key="arch-line" className="block">
                     {arch.titleFirst}{' '}
-                    <span className="text-gradient-gold">{arch.titleSecond}</span>
+                    <span key="arch-gold" className="text-gradient-gold">{arch.titleSecond}</span>
                   </span>,
                 ]}
               />

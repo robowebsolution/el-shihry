@@ -69,4 +69,13 @@
   .text-gradient-gold {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-gold to-white/70;
   }
+
+  .lang-switching main {
+    opacity: 0;
+    filter: blur(4px);
+  }
+
+  main {
+    transition: opacity 0.4s ease, filter 0.4s ease;
+  }
 }

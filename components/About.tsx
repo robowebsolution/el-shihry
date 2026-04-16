@@ -39,7 +39,7 @@ export function About() {
         '-=0.5'
       );
     },
-    { scope: container }
+    { dependencies: [locale], scope: container }
   );
 
   return (

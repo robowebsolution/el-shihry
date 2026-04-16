@@ -69,6 +69,19 @@ export function LanguageProvider({
     document.body.dataset.locale = locale;
     window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
     document.cookie = `${LOCALE_COOKIE_KEY}=${locale}; path=/; max-age=31536000; samesite=lax`;
+
+    // Visual bridge: trigger a small fade out/in to mask the layout shift
+    document.body.classList.add('lang-switching');
+    
+    // Give the browser a moment to apply layout changes, then refresh GSAP and fade back in
+    const timer = setTimeout(() => {
+      import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+        ScrollTrigger.refresh();
+      });
+      document.body.classList.remove('lang-switching');
+    }, 400);
+
+    return () => clearTimeout(timer);
   }, [locale]);
 
   const value = useMemo<LanguageContextValue>(

@@ -84,10 +84,13 @@ type SiteCopy = {
     terms: string;
   };
   hero: {
+    badge: string;
     scrollLabel: string;
     subtitle: string;
     titleFirst: string;
     titleSecond: string;
+    btnDownload: string;
+    btnProjects: string;
   };
   lifestyle: {
     items: string[];
@@ -189,10 +192,13 @@ export const siteContent = {
       ],
     },
     hero: {
-      titleFirst: 'الشهري',
-      titleSecond: 'للتطوير العقاري',
-      subtitle: 'رولكس العقارات. نصوغ روائع الحياة العصرية بمستوى يليق بالنخبة.',
+      badge: 'الشهري للتطوير العقاري',
+      titleFirst: 'نجعل استثمارك اليوم',
+      titleSecond: 'علامة فارقة في المستقبل',
+      subtitle: 'فصل جديد في قصتنا يبدأ اليوم… لنصنع غدًا يستحق أن يُحكى',
       scrollLabel: 'اكتشف للأسفل',
+      btnDownload: 'تحميل ملف الشركة',
+      btnProjects: 'تصفح مشاريعنا',
     },
     about: {
       eyebrow: 'الرؤية',
@@ -390,10 +396,13 @@ export const siteContent = {
       ],
     },
     hero: {
-      titleFirst: 'El Shihry',
-      titleSecond: 'Developments',
-      subtitle: 'The Rolex of real estate. Crafting masterpieces of modern living for the most refined lifestyles.',
+      badge: 'EL SHIHRY DEVELOPMENTS',
+      titleFirst: 'Building tomorrow',
+      titleSecond: 'landmarks today',
+      subtitle: 'A new chapter in our story begins today… to create a tomorrow worth telling.',
       scrollLabel: 'Scroll to Explore',
+      btnDownload: 'Download Portfolio',
+      btnProjects: 'See Our Projects',
     },
     about: {
       eyebrow: 'The Vision',

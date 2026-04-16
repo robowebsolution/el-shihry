@@ -62,7 +62,7 @@ export function ProjectsBento() {
         }
       });
     },
-    { scope: container }
+    { dependencies: [locale], scope: container }
   );
 
   return (
@@ -77,7 +77,7 @@ export function ProjectsBento() {
           className={cn('mb-4 text-4xl font-bold tracking-tighter md:text-6xl', locale === 'en' ? 'uppercase' : '')}
           lines={[
             <span key="projects-title">
-              {copy.projects.titleFirst} <span className="text-gradient-gold">{copy.projects.titleSecond}</span>
+              {copy.projects.titleFirst} <span key="projects-gold" className="text-gradient-gold">{copy.projects.titleSecond}</span>
             </span>,
           ]}
         />

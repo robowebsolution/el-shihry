@@ -128,7 +128,7 @@ export function WhyInvest() {
         }
       );
     },
-    { scope: container }
+    { dependencies: [locale], scope: container }
   );
 
   return (
