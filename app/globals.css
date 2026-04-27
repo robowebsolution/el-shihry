@@ -17,6 +17,11 @@
 }
 
 @layer base {
+  html,
+  body {
+    position: relative;
+  }
+
   body {
     @apply bg-rich-black text-white antialiased selection:bg-gold selection:text-rich-black;
     font-family: var(--font-body-active);

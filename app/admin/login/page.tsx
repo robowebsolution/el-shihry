@@ -58,6 +58,7 @@ export default function LoginPage() {
               alt="El Shihry Logo"
               width={80}
               height={80}
+              loading="eager"
               className="w-full h-full object-contain"
             />
           </div>
