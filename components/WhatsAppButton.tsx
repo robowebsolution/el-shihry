@@ -3,6 +3,8 @@
 import React from 'react';
 import CircularText from './ui/CircularText';
 import { useLanguage } from '@/components/LanguageProvider';
+import { trackEvent } from '@/lib/analytics';
+import { getWhatsAppUrl } from '@/lib/site-config';
 import { motion } from 'motion/react';
 
 const WhatsAppIcon = () => (
@@ -27,9 +29,7 @@ export function WhatsAppButton() {
     ? "الشهري للتطوير العقاري • " 
     : "EL SHIHRY DEVELOPMENTS • ";
 
-  // Using the phone number from FunctionalSections
-  const phone = "201001234567"; 
-  const whatsappUrl = `https://wa.me/${phone}`;
+  const whatsappUrl = getWhatsAppUrl();
 
   return (
     <div className="fixed bottom-8 right-8 z-[1001]">
@@ -37,6 +37,7 @@ export function WhatsAppButton() {
         href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => trackEvent('whatsapp_click', { locale, placement: 'floating_button' })}
         className="relative block w-[90px] h-[90px]"
         initial={{ opacity: 0, scale: 0.8, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}

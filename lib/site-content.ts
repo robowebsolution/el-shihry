@@ -19,22 +19,57 @@ type NavLink = {
   label: string;
 };
 
-type ProjectCard = {
-  slug: string;
-  title: string;
-  location: string;
+export type ProjectCard = {
+  amenities?: string[];
+  area_name?: string;
+  canonical_slug?: string;
+  city?: string;
   description: string;
-  stats: Array<{ label: string; value: string }>;
+  cover_url?: string;
+  delivery_date?: string;
   details: string[];
+  faq_blocks?: Array<{ answer: string; question: string }>;
+  gallery?: string[];
+  governorate?: string;
+  indexable?: boolean;
+  location: string;
+  meta_description?: string;
+  og_description?: string;
+  og_image?: string;
+  og_title?: string;
+  payment_plan_summary?: string;
+  project_type?: string;
+  seo_title?: string;
+  slug: string;
+  stats: Array<{ label: string; value: string }>;
+  status?: string;
+  title: string;
+  unit_types?: string[];
 };
 
-type BlogPost = {
-  slug: string;
-  title: string;
-  date: string;
-  tag: string;
-  excerpt: string;
+export type BlogPost = {
+  author_name?: string;
   content: string[];
+  cover_url?: string;
+  created_at?: string;
+  date: string;
+  excerpt: string;
+  expert_source?: string;
+  faq_blocks?: Array<{ answer: string; question: string }>;
+  indexable?: boolean;
+  key_takeaways?: string[];
+  meta_description?: string;
+  og_description?: string;
+  og_image?: string;
+  og_title?: string;
+  published_at?: string;
+  reviewed_by?: string;
+  seo_title?: string;
+  slug: string;
+  sources?: string[];
+  tag: string;
+  title: string;
+  updated_at?: string;
 };
 
 type WhyInvestCol = {
@@ -54,7 +89,7 @@ type ArchMetric = {
   value: string;
 };
 
-type SiteCopy = {
+export type SiteCopy = {
   arch: {
     eyebrow: string;
     titleFirst: string;
@@ -91,8 +126,11 @@ type SiteCopy = {
     titleSecond: string;
     btnDownload: string;
     btnProjects: string;
+    videoUrl?: string;
+    posterUrl?: string;
   };
   lifestyle: {
+    images?: string[];
     items: string[];
     titleFirst: string;
     titleSecond: string;
@@ -148,7 +186,7 @@ export const siteImages: {
   projects: [projectOne, projectTwo, projectThree, projectFour],
 };
 
-export const siteContent = {
+export const siteContent: Record<Locale, SiteCopy> = {
   ar: {
     arch: {
       eyebrow: 'النهج المميز',
@@ -199,6 +237,8 @@ export const siteContent = {
       scrollLabel: 'اكتشف للأسفل',
       btnDownload: 'تحميل ملف الشركة',
       btnProjects: 'تصفح مشاريعنا',
+      videoUrl: '',
+      posterUrl: '',
     },
     about: {
       eyebrow: 'الرؤية',
@@ -325,6 +365,7 @@ export const siteContent = {
     lifestyle: {
       titleFirst: 'أسلوب',
       titleSecond: 'العمل',
+      images: siteImages.lifestyle.map((image) => image.src),
       items: ['واجهات ذهبية', 'تصميمات ملكية', 'إطلالات بانورامية', 'سكينة ساحلية'],
     },
     whyInvest: {
@@ -403,6 +444,8 @@ export const siteContent = {
       scrollLabel: 'Scroll to Explore',
       btnDownload: 'Download Portfolio',
       btnProjects: 'See Our Projects',
+      videoUrl: '',
+      posterUrl: '',
     },
     about: {
       eyebrow: 'The Vision',
@@ -529,6 +572,7 @@ export const siteContent = {
     lifestyle: {
       titleFirst: 'The',
       titleSecond: 'Lifestyle',
+      images: siteImages.lifestyle.map((image) => image.src),
       items: ['Golden Facades', 'Royal Interiors', 'Skyline Views', 'Coastal Serenity'],
     },
     whyInvest: {
@@ -557,4 +601,4 @@ export const siteContent = {
       rights: 'All rights reserved.',
     },
   },
-} satisfies Record<Locale, SiteCopy>;
+};

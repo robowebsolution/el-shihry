@@ -5,32 +5,39 @@ import Link from 'next/link';
 import { Facebook, Globe, Instagram, Linkedin, Mail, MapPin, Phone } from 'lucide-react';
 
 import { FooterBackgroundGradient, TextHoverEffect } from '@/components/ui/hover-footer';
+import { trackEvent } from '@/lib/analytics';
 import { useLanguage } from '@/components/LanguageProvider';
 import { LocaleReveal } from '@/components/LocaleReveal';
 import { ScrollRevealHeading } from '@/components/ScrollRevealHeading';
+import { getMailtoHref, getPhoneHref, getSocialLinks, siteConfig } from '@/lib/site-config';
 import { cn } from '@/lib/utils';
 
-const socialLinks = [
-  { icon: Facebook, label: 'Facebook', href: '#' },
-  { icon: Instagram, label: 'Instagram', href: '#' },
-  { icon: Linkedin, label: 'LinkedIn', href: '#' },
-  { icon: Globe, label: 'Website', href: '#' },
-];
-
 export function Footer() {
-  const { copy, locale } = useLanguage();
+  const { copy, locale, localizeHref } = useLanguage();
   const isArabic = locale === 'ar';
+  const socialLinks = getSocialLinks().map(({ href, platform }) => ({
+    href,
+    icon:
+      platform === 'facebook'
+        ? Facebook
+        : platform === 'instagram'
+          ? Instagram
+          : platform === 'linkedin'
+            ? Linkedin
+            : Globe,
+    label: platform[0].toUpperCase() + platform.slice(1),
+  }));
 
   const contactInfo = [
     {
       icon: Mail,
-      text: 'info@elshihry.com',
-      href: 'mailto:info@elshihry.com',
+      text: siteConfig.email,
+      href: getMailtoHref(),
     },
     {
       icon: Phone,
-      text: '+20 100 123 4567',
-      href: 'tel:+201001234567',
+      text: siteConfig.phone,
+      href: getPhoneHref(),
     },
     {
       icon: MapPin,
@@ -52,12 +59,13 @@ export function Footer() {
         <div className="grid gap-12 border-b border-white/10 pb-12 lg:grid-cols-[1.15fr_0.75fr_0.75fr_1fr]">
           <div className={cn('max-w-md', isArabic ? 'text-right' : 'text-left')}>
             <LocaleReveal localeKey={`footer-brand-${locale}`}>
-              <Link href="/" aria-label="El Shihry Home" className="mb-6 inline-block">
+              <Link href={localizeHref('/') as any} aria-label="El Shihry Home" className="mb-6 inline-block">
                 <Image
                   src="/logo.webp"
                   alt="El Shihry Logo"
                   width={180}
                   height={72}
+                  sizes="180px"
                   className="h-16 w-auto object-contain md:h-20"
                 />
               </Link>
@@ -85,7 +93,7 @@ export function Footer() {
             <ul className="space-y-4 text-sm text-white/65 md:text-base">
               {copy.footer.links.map((item) => (
                 <li key={item.hash}>
-                  <Link href={item.href} className="transition-colors hover:text-white">
+                  <Link href={localizeHref(item.href) as any} className="transition-colors hover:text-white">
                     {item.label}
                   </Link>
                 </li>
@@ -97,14 +105,14 @@ export function Footer() {
             <h4 className="mb-6 text-sm font-semibold tracking-[0.28em] text-gold uppercase">{policyTitle}</h4>
             <ul className="space-y-4 text-sm text-white/65 md:text-base">
               <li>
-                <a href="#" className="transition-colors hover:text-white">
+                <Link href={localizeHref('/privacy-policy') as any} className="transition-colors hover:text-white">
                   {copy.footer.privacy}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="transition-colors hover:text-white">
+                <Link href={localizeHref('/terms') as any} className="transition-colors hover:text-white">
                   {copy.footer.terms}
-                </a>
+                </Link>
               </li>
               <li className="text-white/40">{copy.footer.location}</li>
             </ul>
@@ -123,7 +131,15 @@ export function Footer() {
                     </span>
 
                     {item.href ? (
-                      <a href={item.href} className="transition-colors hover:text-white">
+                      <a
+                        href={item.href}
+                        onClick={() =>
+                          item.href?.startsWith('tel:')
+                            ? trackEvent('phone_click', { locale, placement: 'footer' })
+                            : undefined
+                        }
+                        className="transition-colors hover:text-white"
+                      >
                         {item.text}
                       </a>
                     ) : (

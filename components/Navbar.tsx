@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 
 export function Navbar() {
   const { scrollY } = useScroll();
-  const { copy, locale, toggleLocale } = useLanguage();
+  const { copy, locale, localizeHref, toggleLocale } = useLanguage();
   const [hidden, setHidden] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -64,14 +64,15 @@ export function Navbar() {
               isScrolled || isOpen ? 'glass-panel px-5 py-3 md:px-8 md:py-4' : 'px-2 py-2 md:px-4'
             )}
           >
-            <Link href="/" className="flex items-center" aria-label="El Shihry Home">
+            <Link href={localizeHref('/') as any} className="flex items-center" aria-label="El Shihry Home">
               <Image
                 src="/logo.webp"
                 alt="El Shihry Logo"
                 width={150}
                 height={60}
+                sizes="150px"
+                loading="eager"
                 className="h-12 w-auto object-contain md:h-18"
-                priority
               />
             </Link>
 
@@ -81,7 +82,7 @@ export function Navbar() {
                 {copy.nav.links.map((item) => (
                   <Link
                     key={item.hash}
-                    href={item.href}
+                    href={localizeHref(item.href) as any}
                     className="text-sm font-medium tracking-[0.22em] text-white/80 uppercase transition-colors hover:text-gold"
                   >
                     {item.label}
@@ -179,7 +180,7 @@ export function Navbar() {
                   transition={{ delay: 0.1 + index * 0.1, duration: 0.4 }}
                 >
                   <Link
-                    href={item.href}
+                    href={localizeHref(item.href) as any}
                     onClick={() => setIsOpen(false)}
                     className="group relative block text-2xl font-bold tracking-[0.3em] text-white uppercase transition-colors hover:text-gold"
                   >

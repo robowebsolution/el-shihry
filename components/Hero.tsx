@@ -1,13 +1,16 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowLeft, ArrowRight, ArrowUpLeft, ArrowUpRight } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 import { useLanguage } from '@/components/LanguageProvider';
+import { trackEvent } from '@/lib/analytics';
+import { siteConfig } from '@/lib/site-config';
 import { LocaleReveal } from '@/components/LocaleReveal';
 import { ScrollRevealHeading } from '@/components/ScrollRevealHeading';
 import { siteImages } from '@/lib/site-content';
@@ -15,15 +18,36 @@ import { cn } from '@/lib/utils';
 
 gsap.registerPlugin(ScrollTrigger);
 
+type IdleWindow = Window & {
+  cancelIdleCallback?: (handle: number) => void;
+  requestIdleCallback?: (
+    callback: IdleRequestCallback,
+    options?: IdleRequestOptions
+  ) => number;
+};
+
 export function Hero() {
   const container = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLDivElement>(null);
-  const { copy, locale } = useLanguage();
+  const videoLayerRef = useRef<HTMLDivElement>(null);
+  const videoElementRef = useRef<HTMLVideoElement>(null);
+  const lastLoggedVideoUrlRef = useRef<string | null>(null);
+  const { copy, content, locale, localizeHref } = useLanguage();
   const isRTL = locale === 'ar';
+  const [readyVideoUrl, setReadyVideoUrl] = useState('');
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+  const alternateLocale = locale === 'ar' ? 'en' : 'ar';
+  const posterUrl =
+    copy.hero.posterUrl ||
+    content[alternateLocale].hero.posterUrl ||
+    siteImages.hero.src;
+  const videoUrl =
+    copy.hero.videoUrl ||
+    content[alternateLocale].hero.videoUrl ||
+    '';
 
-    useGSAP(
+  useGSAP(
     () => {
-      gsap.to(videoRef.current, {
+      gsap.to(videoLayerRef.current, {
         yPercent: 30,
         ease: 'none',
         scrollTrigger: {
@@ -37,6 +61,66 @@ export function Hero() {
     { dependencies: [locale], scope: container }
   );
 
+  useEffect(() => {
+    const idleWindow = window as IdleWindow;
+    let timeoutId: number | null = null;
+    let idleId: number | null = null;
+
+    const scheduleVideoLoad = () => {
+      if (idleWindow.requestIdleCallback) {
+        idleId = idleWindow.requestIdleCallback(() => {
+          setShouldLoadVideo(true);
+        }, { timeout: 1200 });
+
+        return;
+      }
+
+      timeoutId = window.setTimeout(() => {
+        setShouldLoadVideo(true);
+      }, 250);
+    };
+
+    const frameId = window.requestAnimationFrame(scheduleVideoLoad);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+
+      if (idleId !== null && idleWindow.cancelIdleCallback) {
+        idleWindow.cancelIdleCallback(idleId);
+      }
+    };
+  }, [videoUrl]);
+
+  useEffect(() => {
+    if (lastLoggedVideoUrlRef.current === videoUrl) {
+      return;
+    }
+
+    lastLoggedVideoUrlRef.current = videoUrl;
+    console.info('[Hero] runtime videoUrl:', videoUrl || '(empty)');
+  }, [videoUrl]);
+
+  useEffect(() => {
+    const video = videoElementRef.current;
+
+    if (!video || !shouldLoadVideo || !videoUrl) {
+      return;
+    }
+
+    video.load();
+
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(() => {
+        // Autoplay can be blocked transiently; keep the poster visible until playback starts.
+      });
+    }
+  }, [shouldLoadVideo, videoUrl]);
+
   return (
     <section
       ref={container}
@@ -44,7 +128,7 @@ export function Hero() {
       className="relative flex h-screen w-full items-center overflow-hidden"
     >
       {/* ─── Video Background ─── */}
-      <div ref={videoRef} className="absolute inset-0 -top-[15%] z-0 h-[130%] w-full">
+      <div ref={videoLayerRef} className="absolute inset-0 -top-[15%] z-0 h-[130%] w-full">
         {/* gradient overlay: darker on the content side */}
         <div 
           className={cn(
@@ -52,16 +136,28 @@ export function Hero() {
             isRTL && "bg-gradient-to-l"
           )} 
         />
+        <Image
+          src={posterUrl}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
         <video
+          ref={videoElementRef}
           autoPlay
           muted
           loop
           playsInline
-          poster={siteImages.hero.src}
-          className="h-full w-full object-cover"
-        >
-          <source src="/hero-video.mp4" type="video/mp4" />
-        </video>
+          src={shouldLoadVideo && videoUrl ? videoUrl : undefined}
+          preload="metadata"
+          onCanPlay={() => setReadyVideoUrl(videoUrl)}
+          className={cn(
+            'absolute inset-0 h-full w-full object-cover transition-opacity duration-500',
+            readyVideoUrl === videoUrl ? 'opacity-100' : 'opacity-0'
+          )}
+        />
       </div>
 
       {/* ─── Content ─── */}
@@ -116,8 +212,9 @@ export function Hero() {
 
               {/* Primary — Download Portfolio */}
               <a
-                href="/portfolio.pdf"
+                href={siteConfig.portfolioPath}
                 download
+                onClick={() => trackEvent('brochure_download', { locale, placement: 'hero' })}
                 className={cn(
                   'group inline-flex items-center gap-3 rounded-full px-7 py-3.5',
                   'bg-white text-rich-black text-sm font-semibold tracking-wide',
@@ -144,7 +241,8 @@ export function Hero() {
 
               {/* Secondary — See Our Projects */}
               <Link
-                href={{ pathname: '/projects' }}
+                href={localizeHref('/projects') as any}
+                onClick={() => trackEvent('project_cta_click', { locale, placement: 'hero' })}
                 className={cn(
                   'group inline-flex items-center gap-2 rounded-full border border-white/25 px-7 py-3.5',
                   'text-sm font-medium text-white/80 tracking-wide',

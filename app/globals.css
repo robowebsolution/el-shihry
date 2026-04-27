@@ -59,9 +59,23 @@
       opacity 250ms ease,
       transform 250ms ease;
   }
+
+  [data-lenis-prevent],
+  [data-lenis-prevent-wheel],
+  [data-lenis-prevent-touch],
+  [data-lenis-prevent-vertical],
+  [data-lenis-prevent-horizontal] {
+    overscroll-behavior: contain;
+  }
 }
 
 @layer utilities {
+  @keyframes shimmer {
+    100% {
+      transform: translateX(200%);
+    }
+  }
+
   .glass-panel {
     @apply bg-glass backdrop-blur-[24px] border border-glass-border shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
   }
@@ -77,5 +91,29 @@
 
   main {
     transition: opacity 0.4s ease, filter 0.4s ease;
+  }
+
+  .gallery-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(241, 213, 130, 0.5) rgba(255, 255, 255, 0.05);
+  }
+
+  .gallery-scrollbar::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .gallery-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 999px;
+  }
+
+  .gallery-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(241, 213, 130, 0.8), rgba(241, 213, 130, 0.35));
+    border-radius: 999px;
+    border: 2px solid rgba(10, 10, 11, 0.7);
+  }
+
+  .gallery-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(241, 213, 130, 0.95), rgba(241, 213, 130, 0.5));
   }
 }

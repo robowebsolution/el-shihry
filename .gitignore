@@ -1,7 +1,34 @@
+# Dependencies
 node_modules/
+
+# Next.js build output
 .next/
+out/
+
+# Build caches and artifacts
+dist/
+build/
 coverage/
-.DS_Store
+*.tsbuildinfo
+
+# Logs
 *.log
-.env*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.next-dev-*.log
+
+# Environment files and secrets
+.env
+.env.*
 !.env.example
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+
+# Local database/schema artifacts
+database schema.sql
+seed.sql
+generate_seed.ts

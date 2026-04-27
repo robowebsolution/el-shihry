@@ -1,5 +1,6 @@
 'use client';
 
+import type { FormEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -14,7 +15,10 @@ import {
 } from 'lucide-react';
 
 import { useLanguage } from '@/components/LanguageProvider';
-import { siteImages, siteContent, type Locale } from '@/lib/site-content';
+import { trackEvent } from '@/lib/analytics';
+import { openLeadWhatsApp } from '@/lib/lead-utils';
+import { siteImages, type Locale } from '@/lib/site-content';
+import { getMailtoHref, getPhoneHref, getSocialLinks, siteConfig } from '@/lib/site-config';
 import { cn } from '@/lib/utils';
 
 type SectionCopy = {
@@ -185,12 +189,6 @@ const sectionCopy: Record<Locale, SectionCopy> = {
   },
 };
 
-const socialLinks = [
-  { icon: Facebook, label: 'Facebook', href: '#' },
-  { icon: Instagram, label: 'Instagram', href: '#' },
-  { icon: Linkedin, label: 'LinkedIn', href: '#' },
-];
-
 function SectionIntro({
   eyebrow,
   title,
@@ -219,11 +217,38 @@ function SectionIntro({
 }
 
 export function FunctionalSections() {
-  const { locale } = useLanguage();
+  const { locale, copy: siteCopy, localizeHref } = useLanguage();
   const copy = sectionCopy[locale];
   const isArabic = locale === 'ar';
   const mapHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(copy.contact.address)}`;
-  const phoneHref = `tel:${copy.contact.phone.replace(/\s+/g, '')}`;
+  const phoneHref = getPhoneHref();
+  const blogItems = siteCopy.blog.items.slice(0, 3);
+  const socialLinks = getSocialLinks().map(({ href, platform }) => ({
+    href,
+    icon:
+      platform === 'facebook'
+        ? Facebook
+        : platform === 'instagram'
+          ? Instagram
+          : Linkedin,
+    label: platform[0].toUpperCase() + platform.slice(1),
+  }));
+
+  const handleLeadSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const interest = String(formData.get('interest') || '');
+    trackEvent('form_submit', { locale, source: 'home_contact' });
+    openLeadWhatsApp({
+      email: String(formData.get('email') || ''),
+      interest: interest && interest !== copy.contact.interestOptions[0] ? interest : '',
+      locale,
+      name: String(formData.get('name') || ''),
+      phone: String(formData.get('phone') || ''),
+      source: 'home_contact',
+    });
+  };
 
   return (
     <section className="motion-safe bg-rich-black px-4 py-20 sm:px-6 lg:px-8">
@@ -294,7 +319,7 @@ export function FunctionalSections() {
               isArabic={isArabic}
             />
             <Link 
-              href={"/blog" as any}
+              href={localizeHref('/blog') as any}
               className="inline-flex items-center gap-2 text-sm font-bold tracking-widest text-gold hover:text-white transition-colors uppercase"
             >
                {isArabic ? 'مشاهدة الكل' : 'View All Insights'}
@@ -302,17 +327,18 @@ export function FunctionalSections() {
             </Link>
           </div>
           <div className="grid gap-6 lg:grid-cols-3">
-            {siteContent[locale].blog.items.slice(0, 3).map((card, index) => (
+            {blogItems.map((card, index) => (
               <article
                 key={card.title}
                 className="group overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/5 shadow-lg transition hover:border-white/20"
               >
-                <Link href={`/blog/${card.slug}` as any}>
+                <Link href={localizeHref(`/blog/${card.slug}`) as any}>
                   <div className="relative aspect-[16/10] overflow-hidden bg-rich-black-light">
                     <Image
                       src={siteImages.lifestyle[index % siteImages.lifestyle.length]}
                       alt={card.title}
                       fill
+                      sizes="(max-width: 1024px) 100vw, 33vw"
                       className="object-cover transition duration-500 group-hover:scale-105"
                     />
                     <span
@@ -336,11 +362,11 @@ export function FunctionalSections() {
                   </div>
                 </Link>
                 <div className={cn('space-y-4 px-6 py-6', isArabic ? 'text-right' : 'text-left')}>
-                  <Link href={`/blog/${card.slug}` as any}>
+                  <Link href={localizeHref(`/blog/${card.slug}`) as any}>
                     <h3 className="text-xl font-semibold leading-8 text-white hover:text-gold transition-colors">{card.title}</h3>
                   </Link>
                   <Link
-                    href={`/blog/${card.slug}` as any}
+                    href={localizeHref(`/blog/${card.slug}`) as any}
                     className="inline-flex items-center gap-2 text-sm font-semibold text-gold transition hover:text-white"
                   >
                     {copy.blog.cta}
@@ -365,7 +391,7 @@ export function FunctionalSections() {
                 <h3 className="text-lg font-semibold text-white">{copy.contact.formHeading}</h3>
                 <p className="mt-2 text-sm text-white/70">{copy.contact.formNote}</p>
               </div>
-              <form className="mt-8 grid gap-5 sm:grid-cols-2">
+              <form className="mt-8 grid gap-5 sm:grid-cols-2" onSubmit={handleLeadSubmit}>
                 <label className={cn('space-y-2 text-sm font-medium text-white/80', isArabic ? 'text-right' : 'text-left')}>
                   <span>{copy.contact.nameLabel}</span>
                   <input
@@ -381,7 +407,7 @@ export function FunctionalSections() {
                     type="tel"
                     name="phone"
                     className="h-12 w-full rounded-2xl border border-white/10 bg-rich-black-light px-4 text-sm text-white outline-none transition placeholder:text-white/40 focus:border-gold/50 focus:bg-rich-black"
-                    placeholder={copy.contact.phoneLabel}
+                    placeholder={siteConfig.phone}
                   />
                 </label>
                 <label className={cn('space-y-2 text-sm font-medium text-white/80 sm:col-span-2', isArabic ? 'text-right' : 'text-left')}>
@@ -390,7 +416,7 @@ export function FunctionalSections() {
                     type="email"
                     name="email"
                     className="h-12 w-full rounded-2xl border border-white/10 bg-rich-black-light px-4 text-sm text-white outline-none transition placeholder:text-white/40 focus:border-gold/50 focus:bg-rich-black"
-                    placeholder={copy.contact.emailLabel}
+                    placeholder={siteConfig.email}
                   />
                 </label>
                 <label className={cn('space-y-2 text-sm font-medium text-white/80 sm:col-span-2', isArabic ? 'text-right' : 'text-left')}>
@@ -445,6 +471,7 @@ export function FunctionalSections() {
                         href={mapHref as any}
                         target="_blank"
                         rel="noreferrer"
+                        onClick={() => trackEvent('project_cta_click', { locale, placement: 'map_link' })}
                         className="inline-flex items-center gap-2 text-sm font-medium text-gold"
                       >
                         {copy.contact.mapLabel}
@@ -468,8 +495,8 @@ export function FunctionalSections() {
                       >
                         {copy.contact.phoneLabel}
                       </p>
-                      <Link href={phoneHref as any} className="text-sm leading-7 text-white/90">
-                        {copy.contact.phone}
+                      <Link href={phoneHref as any} onClick={() => trackEvent('phone_click', { locale, placement: 'home_contact' })} className="text-sm leading-7 text-white/90">
+                        {siteConfig.phone}
                       </Link>
                     </div>
                   </div>
@@ -489,8 +516,8 @@ export function FunctionalSections() {
                       >
                         {copy.contact.emailLabel}
                       </p>
-                      <Link href={`mailto:${copy.contact.email}` as any} className="text-sm leading-7 text-white/90">
-                        {copy.contact.email}
+                      <Link href={getMailtoHref() as any} className="text-sm leading-7 text-white/90">
+                        {siteConfig.email}
                       </Link>
                     </div>
                   </div>

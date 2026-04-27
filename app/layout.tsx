@@ -1,13 +1,11 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { Alexandria, IBM_Plex_Sans_Arabic, Inter, Urbanist } from 'next/font/google';
 import './globals.css';
-import { SmoothScroll } from '@/components/SmoothScroll';
-import { LanguageProvider } from '@/components/LanguageProvider';
-import { Navbar } from '@/components/Navbar';
-import { WhatsAppButton } from '@/components/WhatsAppButton';
-import { Footer } from '@/components/Footer';
+import { GoogleAnalytics } from '@/components/GoogleAnalytics';
+import { getLocaleDirection, isLocale } from '@/lib/i18n';
 import type { Locale } from '@/lib/site-content';
+import { siteConfig } from '@/lib/site-config';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -35,36 +33,47 @@ const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: 'El Shihry Developments | Luxury Real Estate',
-  description: 'The Rolex of Real Estate Websites. A high-end, futuristic, and artistic website for El Shihry Developments.',
+  metadataBase: new URL(siteConfig.siteUrl),
+  title: {
+    default: 'El Shihry Developments | Luxury Real Estate',
+    template: '%s | El Shihry Developments',
+  },
+  description: 'Luxury real estate developments in Egypt by El Shihry Developments.',
+  manifest: '/fav-icons/site.webmanifest',
+  icons: {
+    icon: [
+      { url: '/fav-icons/favicon.ico' },
+      { url: '/fav-icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/fav-icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [{ url: '/fav-icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    shortcut: '/fav-icons/favicon.ico',
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get('locale')?.value;
-  const locale: Locale = cookieLocale === 'ar' || cookieLocale === 'en' ? cookieLocale : 'en';
+  const headerList = await headers();
+  const headerLocale = headerList.get('x-site-locale');
+  const locale: Locale = headerLocale && isLocale(headerLocale) ? headerLocale : 'ar';
 
   return (
     <html
       lang={locale}
-      dir={locale === 'ar' ? 'rtl' : 'ltr'}
+      dir={getLocaleDirection(locale)}
       className={`${inter.variable} ${urbanist.variable} ${alexandria.variable} ${ibmPlexSansArabic.variable}`}
     >
       <body className={locale === 'ar' ? 'font-arabic' : 'font-sans'} suppressHydrationWarning>
+        <GoogleAnalytics />
         <style dangerouslySetInnerHTML={{ __html: `
           .motion-safe {
              will-change: transform, opacity;
              transform: translateZ(0);
           }
         `}} />
-        <LanguageProvider defaultLocale={locale}>
-          <SmoothScroll>
-            <Navbar />
-            <main>{children}</main>
-            <Footer />
-          </SmoothScroll>
-          <WhatsAppButton />
-        </LanguageProvider>
+        {children}
       </body>
     </html>
   );

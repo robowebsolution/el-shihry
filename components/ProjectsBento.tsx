@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { useLanguage } from '@/components/LanguageProvider';
+import { trackEvent } from '@/lib/analytics';
 import { LocaleReveal } from '@/components/LocaleReveal';
 import { ScrollRevealHeading } from '@/components/ScrollRevealHeading';
 import { siteImages } from '@/lib/site-content';
@@ -16,15 +17,35 @@ import { cn } from '@/lib/utils';
 gsap.registerPlugin(ScrollTrigger);
 
 const projectLayout = [
-  { id: 1, height: 'h-[60vh]', span: 'col-span-12 md:col-span-8' },
-  { id: 2, height: 'h-[60vh]', span: 'col-span-12 md:col-span-4' },
-  { id: 3, height: 'h-[50vh]', span: 'col-span-12 md:col-span-4' },
-  { id: 4, height: 'h-[50vh]', span: 'col-span-12 md:col-span-8' },
+  {
+    id: 1,
+    height: 'h-[60vh]',
+    span: 'col-span-12 md:col-span-8',
+    sizes: '(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 60vw',
+  },
+  {
+    id: 2,
+    height: 'h-[60vh]',
+    span: 'col-span-12 md:col-span-4',
+    sizes: '(max-width: 768px) 100vw, (max-width: 1200px) 34vw, 30vw',
+  },
+  {
+    id: 3,
+    height: 'h-[50vh]',
+    span: 'col-span-12 md:col-span-4',
+    sizes: '(max-width: 768px) 100vw, (max-width: 1200px) 34vw, 30vw',
+  },
+  {
+    id: 4,
+    height: 'h-[50vh]',
+    span: 'col-span-12 md:col-span-8',
+    sizes: '(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 60vw',
+  },
 ];
 
 export function ProjectsBento() {
   const container = useRef<HTMLDivElement>(null);
-  const { copy, locale } = useLanguage();
+  const { copy, locale, localizeHref } = useLanguage();
 
   useGSAP(
     () => {
@@ -87,16 +108,24 @@ export function ProjectsBento() {
       <div className="grid grid-cols-12 gap-6">
         {projectLayout.map((project, index) => {
           const item = copy.projects.items[index];
+          const projectImage = item.cover_url || siteImages.projects[index % siteImages.projects.length];
 
           return (
             <Link
               key={project.id}
-              href={`/projects/${item.slug}` as any}
+              href={localizeHref(`/projects/${item.slug}`) as any}
+              onClick={() => trackEvent('project_cta_click', { locale, placement: 'home_projects', slug: item.slug })}
               className={`bento-card group relative block overflow-hidden rounded-3xl ${project.span} ${project.height}`}
             >
               <div className="absolute inset-0 z-10 bg-gradient-to-t from-rich-black via-rich-black/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-60" />
 
-              <Image src={siteImages.projects[index]} alt={item.title} fill className="bento-img object-cover transition-transform duration-700" />
+              <Image
+                src={projectImage}
+                alt={item.title}
+                fill
+                sizes={project.sizes}
+                className="bento-img object-cover transition-transform duration-700"
+              />
 
               <LocaleReveal
                 localeKey={`project-card-${locale}-${project.id}`}

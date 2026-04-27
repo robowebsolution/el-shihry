@@ -17,7 +17,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export function About() {
   const container = useRef<HTMLDivElement>(null);
-  const { copy, locale } = useLanguage();
+  const { copy, locale, localizeHref } = useLanguage();
 
   useGSAP(
     () => {
@@ -70,7 +70,7 @@ export function About() {
             <p className="about-text mb-6 text-lg font-light leading-relaxed text-white/70">{copy.about.paragraphs[0]}</p>
             <p className="about-text mb-10 text-lg font-light leading-relaxed text-white/70">{copy.about.paragraphs[1]}</p>
             <Link 
-              href={"/about" as any} 
+              href={localizeHref('/about') as any} 
               className="about-text inline-block glass-panel rounded-full px-8 py-4 text-sm font-bold tracking-[0.24em] uppercase hover:bg-white/10 transition-colors"
             >
               {copy.about.cta}
@@ -79,7 +79,13 @@ export function About() {
         </div>
 
         <div className="about-image relative h-[600px] w-full overflow-hidden rounded-3xl md:w-1/2">
-          <Image src={siteImages.about} alt="Visionary Architecture" fill className="object-cover" />
+          <Image
+            src={siteImages.about}
+            alt="Visionary Architecture"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+          />
           <div className="pointer-events-none absolute inset-0 z-10 rounded-3xl border border-gold/20" />
         </div>
       </div>

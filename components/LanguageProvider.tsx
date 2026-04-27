@@ -5,59 +5,111 @@ import {
   startTransition,
   useContext,
   useEffect,
+  useDeferredValue,
   useMemo,
   useState,
   type ReactNode,
 } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { subscribeToContentUpdates } from '@/lib/content-sync';
+import { getAlternateLocale, localizeHref, switchLocalePathname } from '@/lib/i18n';
 import type { Locale } from '@/lib/site-content';
+import type { SiteCopy } from '@/lib/site-content';
 import { siteContent } from '@/lib/site-content';
 
 const LOCALE_STORAGE_KEY = 'el-shihry-locale';
 const LOCALE_COOKIE_KEY = 'locale';
+const LOCALE_CHANGE_EVENT = 'el-shihry-locale-change';
+
+type DynamicLanguageContent = Partial<Record<Locale, Partial<SiteCopy>>>;
 
 type LanguageContextValue = {
   copy: (typeof siteContent)[Locale];
+  content: typeof siteContent;
+  isContentHydrated: boolean;
+  localizeHref: (href: string | { hash?: string; pathname: string }) => string;
   locale: Locale;
   toggleLocale: () => void;
 };
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-function isLocale(value: string | null): value is Locale {
-  return value === 'ar' || value === 'en';
+let liveContentPromise: Promise<DynamicLanguageContent | null> | null = null;
+
+async function fetchLiveContent() {
+  if (!liveContentPromise) {
+    liveContentPromise = fetch('/api/content', {
+      cache: 'no-store',
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Failed to refresh live content');
+        }
+
+        return response.json() as Promise<DynamicLanguageContent>;
+      })
+      .catch(() => null)
+      .finally(() => {
+        liveContentPromise = null;
+      });
+  }
+
+  return liveContentPromise;
 }
 
 export function LanguageProvider({
   children,
-  defaultLocale = 'en',
+  dynamicContent,
+  locale,
 }: {
   children: ReactNode;
-  defaultLocale?: Locale;
+  dynamicContent?: DynamicLanguageContent;
+  locale: Locale;
 }) {
-  const [locale, setLocale] = useState<Locale>(defaultLocale);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [dynamicOverrides, setDynamicOverrides] = useState<DynamicLanguageContent | undefined>(dynamicContent);
+  const deferredOverrides = useDeferredValue(dynamicOverrides);
+  const content = useMemo<typeof siteContent>(
+    () => ({
+      ar: { ...siteContent.ar, ...(deferredOverrides?.ar ?? {}) },
+      en: { ...siteContent.en, ...(deferredOverrides?.en ?? {}) },
+    }),
+    [deferredOverrides]
+  );
+  const isContentHydrated = true;
 
   useEffect(() => {
-    const syncLocale = (nextLocale: string | null) => {
-      if (!isLocale(nextLocale)) {
+    setDynamicOverrides(dynamicContent);
+  }, [dynamicContent]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const refreshContent = async () => {
+      const nextContent = await fetchLiveContent();
+
+      if (!isMounted || !nextContent) {
         return;
       }
 
-      setLocale((currentLocale) => (currentLocale === nextLocale ? currentLocale : nextLocale));
+      startTransition(() => {
+        setDynamicOverrides(nextContent);
+      });
     };
 
-    syncLocale(window.localStorage.getItem(LOCALE_STORAGE_KEY));
-
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === LOCALE_STORAGE_KEY) {
-        syncLocale(event.newValue);
-      }
-    };
-
-    window.addEventListener('storage', handleStorage);
+    const unsubscribe = subscribeToContentUpdates(() => {
+      void refreshContent();
+    });
 
     return () => {
-      window.removeEventListener('storage', handleStorage);
+      isMounted = false;
+      unsubscribe();
     };
   }, []);
 
@@ -69,6 +121,7 @@ export function LanguageProvider({
     document.body.dataset.locale = locale;
     window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
     document.cookie = `${LOCALE_COOKIE_KEY}=${locale}; path=/; max-age=31536000; samesite=lax`;
+    window.dispatchEvent(new CustomEvent<Locale>(LOCALE_CHANGE_EVENT, { detail: locale }));
 
     // Visual bridge: trigger a small fade out/in to mask the layout shift
     document.body.classList.add('lang-switching');
@@ -86,15 +139,23 @@ export function LanguageProvider({
 
   const value = useMemo<LanguageContextValue>(
     () => ({
-      copy: siteContent[locale],
+      copy: content[locale],
+      content,
+      isContentHydrated,
+      localizeHref: (href) => localizeHref(locale, href),
       locale,
       toggleLocale: () => {
+        const nextLocale = getAlternateLocale(locale);
+        const nextPathname = switchLocalePathname(pathname ?? '/', nextLocale);
+        const queryString = searchParams?.toString() ?? '';
+        const hash = typeof window !== 'undefined' ? window.location.hash : '';
+
         startTransition(() => {
-          setLocale((currentLocale) => (currentLocale === 'ar' ? 'en' : 'ar'));
+          router.push(`${nextPathname}${queryString ? `?${queryString}` : ''}${hash}` as any);
         });
       },
     }),
-    [locale]
+    [content, isContentHydrated, locale, pathname, router, searchParams]
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
