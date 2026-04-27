@@ -41,7 +41,8 @@ export default async function LocalizedHomePage({
   params: Promise<{ locale: 'ar' | 'en' }>;
 }) {
   const { locale } = await params;
-  const content = await getRouteContent(['hero', 'about']);
+  const sectionKeys = ['hero', 'about', 'philosophy', 'projects', 'whyInvest', 'arch', 'marquee', 'lifestyle', 'blog'] as const;
+  const content = await getRouteContent([...sectionKeys]);
   const hero = content[locale]?.hero;
   const about = content[locale]?.about;
   const title =
@@ -52,8 +53,8 @@ export default async function LocalizedHomePage({
 
   return (
     <RouteContentProvider
+      dynamicContent={content}
       locale={locale}
-      sectionKeys={['hero', 'about', 'philosophy', 'projects', 'whyInvest', 'arch', 'marquee', 'lifestyle', 'blog']}
     >
       <StructuredData
         data={[

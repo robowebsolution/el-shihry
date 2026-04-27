@@ -29,13 +29,13 @@ export default async function LocalizedContactPage({
   params: Promise<{ locale: 'ar' | 'en' }>;
 }) {
   const { locale } = await params;
-  const content = await getRouteContent(['contactPage']);
+  const content = await getRouteContent(['contactPage', 'footer']);
   const contact = content[locale]?.contactPage;
   const description = contact?.description || 'Contact El Shihry Developments.';
   const title = locale === 'ar' ? 'تواصل | الشهري للتطوير العقاري' : 'Contact | El Shihry Developments';
 
   return (
-    <RouteContentProvider locale={locale} sectionKeys={['contactPage', 'footer']}>
+    <RouteContentProvider dynamicContent={content} locale={locale}>
       <StructuredData data={buildWebPageSchema({ description, locale, path: '/contact', title })} />
       <ContactPageContent />
     </RouteContentProvider>

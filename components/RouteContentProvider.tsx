@@ -1,18 +1,17 @@
 import { LanguageProvider } from '@/components/LanguageProvider';
-import { getRouteContent } from '@/lib/data/route-content';
+import type { PartialSiteContent } from '@/lib/data/route-content';
 import type { Locale, SiteCopy } from '@/lib/site-content';
 
-export async function RouteContentProvider({
+export function RouteContentProvider({
   children,
+  dynamicContent,
   locale,
-  sectionKeys,
 }: {
   children: React.ReactNode;
+  dynamicContent?: PartialSiteContent;
   locale: Locale;
-  sectionKeys: Array<keyof SiteCopy>;
+  sectionKeys?: Array<keyof SiteCopy>;
 }) {
-  const dynamicContent = await getRouteContent(sectionKeys);
-
   return (
     <LanguageProvider locale={locale} dynamicContent={dynamicContent}>
       {children}

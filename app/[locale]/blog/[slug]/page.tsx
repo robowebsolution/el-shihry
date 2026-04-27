@@ -7,6 +7,7 @@ import {
   getBlogEntriesBySlug,
   getBlogSlugs,
 } from '@/lib/data/public-content';
+import { getRouteContent } from '@/lib/data/route-content';
 import { StructuredData } from '@/components/StructuredData';
 import { buildBlogPostingSchema, buildBreadcrumbSchema, buildLocalizedMetadata, buildWebPageSchema } from '@/lib/seo';
 
@@ -47,7 +48,10 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
 
 export default async function LocalizedBlogPostPage({ params }: BlogPageProps) {
   const { locale, slug } = await params;
-  const { entries, postIndex } = await getBlogEntriesBySlug(slug);
+  const [{ entries, postIndex }, content] = await Promise.all([
+    getBlogEntriesBySlug(slug),
+    getRouteContent(['blog']),
+  ]);
 
   if (!entries.en && !entries.ar) {
     notFound();
@@ -60,7 +64,7 @@ export default async function LocalizedBlogPostPage({ params }: BlogPageProps) {
   }
 
   return (
-    <RouteContentProvider locale={locale} sectionKeys={['blog']}>
+    <RouteContentProvider dynamicContent={content} locale={locale}>
       <StructuredData
         data={[
           buildWebPageSchema({

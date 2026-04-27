@@ -35,7 +35,7 @@ export default async function LocalizedProjectsPage({
   const title = locale === 'ar' ? 'المشاريع | الشهري للتطوير العقاري' : 'Projects | El Shihry Developments';
 
   return (
-    <RouteContentProvider locale={locale} sectionKeys={['projects']}>
+    <RouteContentProvider dynamicContent={content} locale={locale}>
       <StructuredData data={buildWebPageSchema({ description, locale, path: '/projects', title })} />
       <ProjectsPageContent />
     </RouteContentProvider>

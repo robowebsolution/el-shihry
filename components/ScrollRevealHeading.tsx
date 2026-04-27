@@ -30,6 +30,33 @@ type ScrollRevealHeadingProps = {
 
 const containsArabicScript = (value: string) => ARABIC_SCRIPT_REGEX.test(value);
 
+function renderNodeList(
+  nodes: ReactNode[],
+  keyPrefix: string,
+  wordClassName?: string,
+  inheritedClassName?: string
+) {
+  const renderedNodes: ReactNode[] = [];
+
+  nodes.forEach((child, index) => {
+    const renderedChild = renderChars(
+      child,
+      `${keyPrefix}-${index}`,
+      wordClassName,
+      inheritedClassName
+    );
+
+    if (Array.isArray(renderedChild)) {
+      renderedNodes.push(...renderedChild);
+      return;
+    }
+
+    renderedNodes.push(renderedChild);
+  });
+
+  return renderedNodes;
+}
+
 // Helper to recursively break strings into reveal-safe spans
 const renderChars = (node: ReactNode, keyPrefix: string, wordClassName?: string, inheritedClassName?: string): ReactNode => {
   if (typeof node === 'string') {
@@ -75,13 +102,11 @@ const renderChars = (node: ReactNode, keyPrefix: string, wordClassName?: string,
     const nodeClassName = props.className;
     const isGradient = typeof nodeClassName === 'string' && nodeClassName.includes('text-gradient-gold');
     const children = Array.isArray(props.children)
-      ? props.children.flatMap((child, i) =>
-          renderChars(
-            child,
-            `${keyPrefix}-el-${i}`,
-            wordClassName,
-            isGradient ? 'text-gradient-gold' : inheritedClassName
-          )
+      ? renderNodeList(
+          props.children,
+          `${keyPrefix}-el`,
+          wordClassName,
+          isGradient ? 'text-gradient-gold' : inheritedClassName
         )
       : renderChars(
           props.children,
@@ -92,9 +117,7 @@ const renderChars = (node: ReactNode, keyPrefix: string, wordClassName?: string,
 
     if (isFragment) {
       const fragmentChildren = Array.isArray(props.children)
-        ? props.children.flatMap((child, i) =>
-            renderChars(child, `${keyPrefix}-el-${i}`, wordClassName, inheritedClassName)
-          )
+        ? renderNodeList(props.children, `${keyPrefix}-el`, wordClassName, inheritedClassName)
         : renderChars(props.children, `${keyPrefix}-el`, wordClassName, inheritedClassName);
       return <React.Fragment key={keyPrefix}>{fragmentChildren}</React.Fragment>;
     }
@@ -107,7 +130,7 @@ const renderChars = (node: ReactNode, keyPrefix: string, wordClassName?: string,
   }
 
   if (Array.isArray(node)) {
-    return node.flatMap((child, i) => renderChars(child, `${keyPrefix}-arr-${i}`, wordClassName, inheritedClassName));
+    return renderNodeList(node, `${keyPrefix}-arr`, wordClassName, inheritedClassName);
   }
 
   return node;

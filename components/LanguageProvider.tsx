@@ -7,6 +7,7 @@ import {
   useEffect,
   useDeferredValue,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -23,6 +24,37 @@ const LOCALE_COOKIE_KEY = 'locale';
 const LOCALE_CHANGE_EVENT = 'el-shihry-locale-change';
 
 type DynamicLanguageContent = Partial<Record<Locale, Partial<SiteCopy>>>;
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function mergeLocaleContent(
+  fallback: SiteCopy,
+  override?: Partial<SiteCopy>
+): SiteCopy {
+  if (!override) {
+    return fallback;
+  }
+
+  const mergedContent = {} as SiteCopy;
+
+  Object.entries(fallback).forEach(([sectionKey, sectionValue]) => {
+    const overrideValue = override[sectionKey as keyof SiteCopy];
+
+    if (isPlainObject(sectionValue) && isPlainObject(overrideValue)) {
+      (mergedContent as Record<string, unknown>)[sectionKey] = {
+        ...sectionValue,
+        ...overrideValue,
+      };
+      return;
+    }
+
+    (mergedContent as Record<string, unknown>)[sectionKey] = overrideValue ?? sectionValue;
+  });
+
+  return mergedContent;
+}
 
 type LanguageContextValue = {
   copy: (typeof siteContent)[Locale];
@@ -74,11 +106,12 @@ export function LanguageProvider({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [dynamicOverrides, setDynamicOverrides] = useState<DynamicLanguageContent | undefined>(dynamicContent);
+  const hasMountedLocaleEffect = useRef(false);
   const deferredOverrides = useDeferredValue(dynamicOverrides);
   const content = useMemo<typeof siteContent>(
     () => ({
-      ar: { ...siteContent.ar, ...(deferredOverrides?.ar ?? {}) },
-      en: { ...siteContent.en, ...(deferredOverrides?.en ?? {}) },
+      ar: mergeLocaleContent(siteContent.ar, deferredOverrides?.ar),
+      en: mergeLocaleContent(siteContent.en, deferredOverrides?.en),
     }),
     [deferredOverrides]
   );
@@ -123,18 +156,23 @@ export function LanguageProvider({
     document.cookie = `${LOCALE_COOKIE_KEY}=${locale}; path=/; max-age=31536000; samesite=lax`;
     window.dispatchEvent(new CustomEvent<Locale>(LOCALE_CHANGE_EVENT, { detail: locale }));
 
+    if (!hasMountedLocaleEffect.current) {
+      hasMountedLocaleEffect.current = true;
+      return;
+    }
+
     // Visual bridge: trigger a small fade out/in to mask the layout shift
     document.body.classList.add('lang-switching');
-    
-    // Give the browser a moment to apply layout changes, then refresh GSAP and fade back in
-    const timer = setTimeout(() => {
+
+    // Refresh layout measurements only after a real locale toggle.
+    const timer = window.setTimeout(() => {
       import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
         ScrollTrigger.refresh();
       });
       document.body.classList.remove('lang-switching');
     }, 400);
 
-    return () => clearTimeout(timer);
+    return () => window.clearTimeout(timer);
   }, [locale]);
 
   const value = useMemo<LanguageContextValue>(

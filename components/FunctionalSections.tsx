@@ -368,8 +368,10 @@ export function FunctionalSections() {
                   <Link
                     href={localizeHref(`/blog/${card.slug}`) as any}
                     className="inline-flex items-center gap-2 text-sm font-semibold text-gold transition hover:text-white"
+                    aria-label={`${copy.blog.cta}: ${card.title}`}
                   >
                     {copy.blog.cta}
+                    <span className="sr-only">: {card.title}</span>
                     <ArrowUpRight className="h-4 w-4" />
                   </Link>
                 </div>

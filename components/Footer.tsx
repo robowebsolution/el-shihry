@@ -89,7 +89,7 @@ export function Footer() {
           </div>
 
           <div className={cn(isArabic ? 'text-right' : 'text-left')}>
-            <h4 className="mb-6 text-sm font-semibold tracking-[0.28em] text-gold uppercase">{quickLinksTitle}</h4>
+            <h3 className="mb-6 text-sm font-semibold tracking-[0.28em] text-gold uppercase">{quickLinksTitle}</h3>
             <ul className="space-y-4 text-sm text-white/65 md:text-base">
               {copy.footer.links.map((item) => (
                 <li key={item.hash}>
@@ -102,7 +102,7 @@ export function Footer() {
           </div>
 
           <div className={cn(isArabic ? 'text-right' : 'text-left')}>
-            <h4 className="mb-6 text-sm font-semibold tracking-[0.28em] text-gold uppercase">{policyTitle}</h4>
+            <h3 className="mb-6 text-sm font-semibold tracking-[0.28em] text-gold uppercase">{policyTitle}</h3>
             <ul className="space-y-4 text-sm text-white/65 md:text-base">
               <li>
                 <Link href={localizeHref('/privacy-policy') as any} className="transition-colors hover:text-white">
@@ -119,7 +119,7 @@ export function Footer() {
           </div>
 
           <div className={cn(isArabic ? 'text-right' : 'text-left')}>
-            <h4 className="mb-6 text-sm font-semibold tracking-[0.28em] text-gold uppercase">{copy.footer.contactTitle}</h4>
+            <h3 className="mb-6 text-sm font-semibold tracking-[0.28em] text-gold uppercase">{copy.footer.contactTitle}</h3>
             <ul className="space-y-4 text-sm text-white/65 md:text-base">
               {contactInfo.map((item) => {
                 const Icon = item.icon;

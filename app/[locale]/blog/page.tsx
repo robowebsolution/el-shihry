@@ -35,7 +35,7 @@ export default async function LocalizedBlogPage({
   const title = locale === 'ar' ? 'المدونة | الشهري للتطوير العقاري' : 'Blog | El Shihry Developments';
 
   return (
-    <RouteContentProvider locale={locale} sectionKeys={['blog']}>
+    <RouteContentProvider dynamicContent={content} locale={locale}>
       <StructuredData data={buildWebPageSchema({ description, locale, path: '/blog', title })} />
       <BlogPageContent />
     </RouteContentProvider>

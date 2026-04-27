@@ -97,7 +97,7 @@ export function Navbar() {
                 type="button"
                 onClick={toggleLocale}
                 dir="ltr"
-                aria-label="Toggle language"
+                aria-label="AR EN toggle language"
                 className="relative inline-flex h-9 w-[84px] items-center rounded-full border border-gold/20 bg-white/5 p-1 backdrop-blur-xl md:h-11 md:w-[112px]"
               >
                 <motion.span

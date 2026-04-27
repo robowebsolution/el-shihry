@@ -7,6 +7,7 @@ import {
   getProjectEntriesBySlug,
   getProjectSlugs,
 } from '@/lib/data/public-content';
+import { getRouteContent } from '@/lib/data/route-content';
 import { StructuredData } from '@/components/StructuredData';
 import { buildBreadcrumbSchema, buildLocalizedMetadata, buildProjectWebPageSchema } from '@/lib/seo';
 
@@ -46,7 +47,10 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
 
 export default async function LocalizedProjectPage({ params }: ProjectPageProps) {
   const { locale, slug } = await params;
-  const { entries, projectIndex } = await getProjectEntriesBySlug(slug);
+  const [{ entries, projectIndex }, content] = await Promise.all([
+    getProjectEntriesBySlug(slug),
+    getRouteContent(['projects']),
+  ]);
 
   if (!entries.en && !entries.ar) {
     notFound();
@@ -59,7 +63,7 @@ export default async function LocalizedProjectPage({ params }: ProjectPageProps)
   }
 
   return (
-    <RouteContentProvider locale={locale} sectionKeys={['projects']}>
+    <RouteContentProvider dynamicContent={content} locale={locale}>
       <StructuredData
         data={[
           buildProjectWebPageSchema({ locale, path: `/projects/${slug}`, project }),

@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   reactCompiler: true,
   typedRoutes: true,
-  turbopack: {},
   typescript: {
     ignoreBuildErrors: false,
   },

@@ -74,8 +74,10 @@ export function BlogPageContent() {
               <Link
                 href={localizeHref(`/blog/${post.slug}`) as any}
                 className="group/btn inline-flex items-center gap-4 text-xs font-bold tracking-[0.3em] text-white uppercase"
+                aria-label={`${copy.blog.cta}: ${post.title}`}
               >
                 <span>{copy.blog.cta}</span>
+                <span className="sr-only">: {post.title}</span>
                 <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 transition-all group-hover/btn:bg-gold group-hover/btn:text-rich-black">
                   <ArrowRight className={cn('h-5 w-5', isArabic ? 'rotate-180' : '')} />
                 </div>

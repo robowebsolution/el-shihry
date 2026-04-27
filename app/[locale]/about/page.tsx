@@ -29,13 +29,13 @@ export default async function LocalizedAboutPage({
   params: Promise<{ locale: 'ar' | 'en' }>;
 }) {
   const { locale } = await params;
-  const content = await getRouteContent(['about']);
+  const content = await getRouteContent(['about', 'philosophy']);
   const about = content[locale]?.about;
   const description = about?.paragraphs?.[0] || 'About El Shihry Developments.';
   const title = locale === 'ar' ? 'من نحن | الشهري للتطوير العقاري' : 'About | El Shihry Developments';
 
   return (
-    <RouteContentProvider locale={locale} sectionKeys={['about', 'philosophy']}>
+    <RouteContentProvider dynamicContent={content} locale={locale}>
       <StructuredData data={buildWebPageSchema({ description, locale, path: '/about', title })} />
       <AboutPageContent />
     </RouteContentProvider>
