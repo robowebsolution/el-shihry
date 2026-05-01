@@ -81,7 +81,7 @@ export function ContactPageContent() {
                     name="phone"
                     type="tel"
                     className="w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-5 text-white transition-colors placeholder:text-start focus:border-gold/50 focus:outline-none"
-                    placeholder={siteConfig.phone}
+                    placeholder={siteConfig.phoneDisplay}
                     dir="ltr"
                   />
                 </div>
@@ -130,8 +130,8 @@ export function ContactPageContent() {
 
               <div className="grid gap-8 sm:grid-cols-2">
                 {[
-                  { icon: MapPin, title: isArabic ? 'العنوان' : 'Address', value: copy.footer.location },
-                  { icon: Phone, title: isArabic ? 'اتصل بنا' : 'Call center', value: siteConfig.phone },
+                  { icon: MapPin, title: isArabic ? 'العنوان' : 'Address', value: siteConfig.localizedAddress[locale] },
+                  { icon: Phone, title: isArabic ? 'اتصل بنا' : 'Call center', value: siteConfig.phoneDisplay },
                   { icon: Mail, title: isArabic ? 'البريد' : 'Email', value: siteConfig.email },
                   { icon: Clock, title: isArabic ? 'ساعات العمل' : 'Working hours', value: isArabic ? '9ص - 10م' : '9AM - 10PM' },
                 ].map((item, index) => (

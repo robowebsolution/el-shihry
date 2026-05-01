@@ -1,5 +1,18 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { safeGetUser } from '@/lib/supabase/auth'
+
+function clearSupabaseAuthCookies(request: NextRequest, response: NextResponse) {
+  request.cookies
+    .getAll()
+    .filter(({ name }) => name.startsWith('sb-'))
+    .forEach(({ name }) => {
+      response.cookies.set(name, '', {
+        path: '/',
+        maxAge: 0,
+      })
+    })
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -31,9 +44,11 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user, error } = await safeGetUser(supabase)
+
+  if (error) {
+    clearSupabaseAuthCookies(request, supabaseResponse)
+  }
 
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
   const isLoginRoute = request.nextUrl.pathname === '/admin/login'

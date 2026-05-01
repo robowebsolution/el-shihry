@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { safeGetUser } from '@/lib/supabase/auth';
 
 function revalidateBlogContent() {
   // @ts-ignore
@@ -17,7 +18,7 @@ function revalidateBlogContent() {
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { user } = await safeGetUser(supabase);
 
     if (!user || user.email !== 'elshihry2027@gmail.com') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
@@ -39,7 +40,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { user } = await safeGetUser(supabase);
 
     if (!user || user.email !== 'elshihry2027@gmail.com') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
@@ -119,7 +120,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const { user } = await safeGetUser(supabase);
     
         if (!user || user.email !== 'elshihry2027@gmail.com') {
           return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });

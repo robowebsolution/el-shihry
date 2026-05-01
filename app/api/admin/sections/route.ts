@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { getAdminSectionData } from '@/lib/data/sections';
+import { safeGetUser } from '@/lib/supabase/auth';
 
 function revalidatePublicContent(sectionKey: string) {
   // @ts-ignore - Next 16 types in this environment require 2nd arg
@@ -36,7 +37,7 @@ function revalidatePublicContent(sectionKey: string) {
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { user } = await safeGetUser(supabase);
 
     if (!user || user.email !== 'elshihry2027@gmail.com') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
@@ -61,7 +62,7 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { user } = await safeGetUser(supabase);
 
     // Secondary layer of security
     if (!user || user.email !== 'elshihry2027@gmail.com') {

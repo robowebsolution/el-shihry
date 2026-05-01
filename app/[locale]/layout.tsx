@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { LanguageProvider } from '@/components/LanguageProvider';
 import { RootContentWrapper } from '@/components/RootContentWrapper';
+import { ScrollToTopOnRouteChange } from '@/components/ScrollToTopOnRouteChange';
 import { SmoothScroll } from '@/components/SmoothScroll';
 import { locales, isLocale } from '@/lib/i18n';
 import { getRouteContent } from '@/lib/data/route-content';
@@ -29,6 +30,7 @@ export default async function LocalizedLayout({
   return (
     <LanguageProvider locale={locale as Locale} dynamicContent={dynamicContent}>
       <SmoothScroll>
+        <ScrollToTopOnRouteChange />
         <RootContentWrapper>{children}</RootContentWrapper>
       </SmoothScroll>
     </LanguageProvider>

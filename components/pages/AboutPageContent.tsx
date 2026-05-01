@@ -144,7 +144,7 @@ export function AboutPageContent() {
             {
               icon: MapPin,
               label: isArabic ? 'المقر' : 'Headquarters',
-              value: copy.footer.location,
+              value: siteConfig.localizedAddress[locale],
             },
             {
               icon: Building2,

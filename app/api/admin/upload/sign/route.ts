@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 import { createClient } from '@/lib/supabase/server';
+import { safeGetUser } from '@/lib/supabase/auth';
 
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { user } = await safeGetUser(supabase);
 
     // Secure the route: only allowed admin
     if (!user || user.email !== 'elshihry2027@gmail.com') {

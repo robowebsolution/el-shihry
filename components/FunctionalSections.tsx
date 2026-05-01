@@ -114,10 +114,10 @@ const sectionCopy: Record<Locale, SectionCopy> = {
       button: 'Send Inquiry',
       detailsHeading: 'Direct Contact Details',
       addressLabel: 'Address',
-      address: 'North 90 Street, New Cairo, Egypt',
+      address: 'Villa 472, North El Choueifat, opposite Downtown, Fifth Settlement, New Cairo 11835, Egypt',
       mapLabel: 'View on Google Maps',
-      phone: '+20 100 123 4567',
-      email: 'info@elshihry.com',
+      phone: '010 20008256',
+      email: 'esgroup@gmail.com',
       socialHeading: 'Follow Us',
     },
     blog: {
@@ -174,10 +174,10 @@ const sectionCopy: Record<Locale, SectionCopy> = {
       button: 'إرسال الطلب',
       detailsHeading: 'بيانات التواصل المباشر',
       addressLabel: 'العنوان',
-      address: 'شارع التسعين الشمالي، القاهرة الجديدة، مصر',
+      address: 'فيلا 472 - شمال الشويفات - أمام داون تاون - التجمع الخامس - القاهرة الجديدة 11835، مصر',
       mapLabel: 'عرض على Google Maps',
-      phone: '+20 100 123 4567',
-      email: 'info@elshihry.com',
+      phone: '010 20008256',
+      email: 'esgroup@gmail.com',
       socialHeading: 'تابعنا',
     },
     blog: {
@@ -220,7 +220,8 @@ export function FunctionalSections() {
   const { locale, copy: siteCopy, localizeHref } = useLanguage();
   const copy = sectionCopy[locale];
   const isArabic = locale === 'ar';
-  const mapHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(copy.contact.address)}`;
+  const localizedAddress = siteConfig.localizedAddress[locale];
+  const mapHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(localizedAddress)}`;
   const phoneHref = getPhoneHref();
   const blogItems = siteCopy.blog.items.slice(0, 3);
   const socialLinks = getSocialLinks().map(({ href, platform }) => ({
@@ -409,7 +410,7 @@ export function FunctionalSections() {
                     type="tel"
                     name="phone"
                     className="h-12 w-full rounded-2xl border border-white/10 bg-rich-black-light px-4 text-sm text-white outline-none transition placeholder:text-white/40 focus:border-gold/50 focus:bg-rich-black"
-                    placeholder={siteConfig.phone}
+                    placeholder={siteConfig.phoneDisplay}
                   />
                 </label>
                 <label className={cn('space-y-2 text-sm font-medium text-white/80 sm:col-span-2', isArabic ? 'text-right' : 'text-left')}>
@@ -468,7 +469,7 @@ export function FunctionalSections() {
                       >
                         {copy.contact.addressLabel}
                       </p>
-                      <p className="text-sm leading-7 text-white/90">{copy.contact.address}</p>
+                      <p className="text-sm leading-7 text-white/90">{localizedAddress}</p>
                       <Link
                         href={mapHref as any}
                         target="_blank"
@@ -498,7 +499,7 @@ export function FunctionalSections() {
                         {copy.contact.phoneLabel}
                       </p>
                       <Link href={phoneHref as any} onClick={() => trackEvent('phone_click', { locale, placement: 'home_contact' })} className="text-sm leading-7 text-white/90">
-                        {siteConfig.phone}
+                        {siteConfig.phoneDisplay}
                       </Link>
                     </div>
                   </div>
