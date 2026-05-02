@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 
@@ -12,26 +12,9 @@ import { LocaleReveal } from '@/components/LocaleReveal';
 import { cn } from '@/lib/utils';
 
 export function Navbar() {
-  const { scrollY } = useScroll();
   const { copy, locale, localizeHref, toggleLocale } = useLanguage();
-  const [hidden, setHidden] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  useMotionValueEvent(scrollY, 'change', (latest) => {
-    const previous = scrollY.getPrevious() ?? 0;
-
-    if (latest > previous && latest > 150) {
-      setHidden(true);
-      setIsOpen(false);
-    } else {
-      setHidden(false);
-    }
-
-    setIsScrolled(latest > 50);
-  });
-
-  // Close menu on scroll if open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -46,23 +29,11 @@ export function Navbar() {
   return (
     <>
       <motion.nav
-        variants={{
-          visible: { y: 0 },
-          hidden: { y: '-100%' },
-        }}
-        animate={hidden ? 'hidden' : 'visible'}
-        transition={{ duration: 0.35, ease: 'easeInOut' }}
-        className={cn(
-          'fixed top-0 z-[60] w-full transition-all duration-500',
-          isScrolled ? 'py-4' : 'py-8'
-        )}
+        className="fixed top-0 z-[60] w-full py-6 transition-all duration-500"
       >
         <div className="mx-auto max-w-7xl px-6 md:px-12">
           <div
-            className={cn(
-              'flex items-center justify-between gap-4 rounded-full transition-all duration-500',
-              isScrolled || isOpen ? 'glass-panel px-5 py-3 md:px-8 md:py-4' : 'px-2 py-2 md:px-4'
-            )}
+            className="glass-panel flex items-center justify-between gap-4 rounded-full px-5 py-3 transition-all duration-500 md:px-8 md:py-4"
           >
             <Link href={localizeHref('/') as any} className="flex items-center" aria-label="El Shihry Home">
               <Image

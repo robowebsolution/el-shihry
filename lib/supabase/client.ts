@@ -1,5 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr'
-import { isRefreshTokenNotFoundError } from '@/lib/supabase/auth'
+import { isRecoverableSessionError } from '@/lib/supabase/auth'
 
 let browserClient: ReturnType<typeof createBrowserClient> | undefined
 let recoveryChecked = false
@@ -16,7 +16,7 @@ export function createClient() {
     recoveryChecked = true
 
     void browserClient.auth.getSession().catch(async (error: unknown) => {
-      if (isRefreshTokenNotFoundError(error)) {
+      if (isRecoverableSessionError(error)) {
         await browserClient?.auth.signOut({ scope: 'local' })
       } else {
         throw error
